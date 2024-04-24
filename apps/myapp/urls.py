@@ -8,4 +8,7 @@ urlpatterns = [
     path('login/',views.LoginApi.as_view()),
     path('logout/',views.LogoutApi.as_view()),
 
+    path('merge/',views.PdfMerge.as_view())
+
+
 ]

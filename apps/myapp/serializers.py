@@ -1,11 +1,20 @@
 from rest_framework import serializers
-from .models import Students
 from django.contrib.auth.models import User
-from django.contrib.auth import authenticate
-from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework.response import Response
+from .models import Students,Pdf_Files
 
 
+
+# pdf file things/////////////////////////////////////////////////////////////////////
+
+class PdfUploadSerializer(serializers.ModelSerializer):
+    pdf_file=serializers.FileField()
+
+    class Meta:
+        model=Pdf_Files
+        fields=['pdf_file']
+
+
+# Authentication using jwt//////////////////////////////////////////////////////////////////////////////////
 class RegisterSerializer(serializers.ModelSerializer):
     password=serializers.CharField(write_only=True)
 
@@ -29,6 +38,7 @@ class LogoutSerializer(serializers.ModelSerializer):
     token=serializers.CharField()
 
 
+# crud///////////////////////////////////////////////////////////////////////////////////////////////////
 
 class StudentSerializer(serializers.ModelSerializer):
     id=serializers.IntegerField(allow_null=True,required=True)

@@ -1,25 +1,20 @@
 from django.shortcuts import render
-from .serializers import StudentSerializer,RegisterSerializer,LoginSerializer
+from .serializers import StudentSerializer,RegisterSerializer,LoginSerializer,LogoutSerializer
 from .models import Students
 
 from erp_core.helpers.response import ResponseInfo
 
-# from rest_framework.permissions import IsAuthenticated
 
-
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
 from django.shortcuts import get_object_or_404
-
-
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
+
+
 # Create your views here.
-
-
-
-
 
 
 class StudentList(APIView):
@@ -28,6 +23,8 @@ class StudentList(APIView):
         super(StudentList,self).__init__(**kwargs)
 
     serializer_class=StudentSerializer
+    permission_classes=(IsAuthenticated,)
+
     def get(self,request):
         queryset=Students.objects.all()
         serializer=StudentSerializer(queryset,many=True)
@@ -120,4 +117,41 @@ class LoginApi(APIView):
                 return Response({'message': 'Invalid credentials ,cannot acces user'}, status=status.HTTP_401_UNAUTHORIZED)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+
+class LogoutApi(APIView):
+
+    def __init__(self, **kwargs):
+        self.response_format = ResponseInfo().response
+        super(LogoutApi, self).__init__(**kwargs)
+
+    serilazer_class=LogoutSerializer
+    permission_classes=(IsAuthenticated,)
+
+    def post(self,request):
+        try:
+
+            # refresh_token=request.data.get('token')
+            refresh_token=request.data.get('refresh_token')
+            # refresh_token='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzEzOTQzMTc4LCJpYXQiOjE3MTM5NDI4NzgsImp0aSI6ImRkMjNlZjA5N2ExODRiYTE5OWI1NzE0ZmRhMzUxMDcxIiwidXNlcl9pZCI6MTF9._NYwia1CF6gbfZbGc1j_rgP8OGWAntt6sQfCHeNpPms'
+
+            print(refresh_token,'aaaaaaaaaaa')
+
+            RefreshToken(refresh_token).blacklist()
+
+            # print(refresh_token_obj,'bbbbbbbbbbbbbbbbbbbb')
+
+            # refresh_token_obj.blacklist()
+
+            # print(refresh_token_obj,'ccccccccccc')
+
+            return Response({'details':'Logout sucessfuly'},status=status.HTTP_200_OK)
+        except Exception as e:
+             return Response({"detail": "Invalid token."}, status=status.HTTP_400_BAD_REQUEST)
+        
+
+
+
+### PDF MERAGE AND SPLIT AND IMPORT AND SELECT A SPECIF RANGE
+
 

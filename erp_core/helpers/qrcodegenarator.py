@@ -22,7 +22,9 @@ class qr_codegenertor:
         qrname = f'qrcode-{self.name}.png' #add a db name to generate a qrwith model name from moded
         buffer = BytesIO()
         canvas.save(buffer, 'PNG')
+        buffer.close()   # Close the BytesIO object after saving the image otherwise it take space permently
         return qrname,buffer
+    
 
         # self.qrcode.save(qrname, File(buffer), save=False)
         # canvas.close()

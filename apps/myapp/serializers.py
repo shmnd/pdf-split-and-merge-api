@@ -5,6 +5,7 @@ from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.response import Response
 
+
 class RegisterSerializer(serializers.ModelSerializer):
     password=serializers.CharField(write_only=True)
 
@@ -24,10 +25,8 @@ class LoginSerializer(serializers.ModelSerializer):
         fields=['username','password']
     
     
-
-
-    
-
+class LogoutSerializer(serializers.ModelSerializer):
+    token=serializers.CharField()
 
 
 

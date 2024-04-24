@@ -58,6 +58,8 @@ class Students(BaseModel):
         return str(self.student_id)
     
 
+    
+
 
 #     def save(self,*args, **kwargs):
 #         qrcode_img=qrcode.make(self.name)

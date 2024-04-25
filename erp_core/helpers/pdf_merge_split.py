@@ -4,18 +4,20 @@ import os
 from PyPDF2 import PdfReader,PdfWriter
 
 
-class MergeAndSplit:
+class MergeAndSplit():
+    def __init__(self, error_messages):
+        self.error_message = error_messages
 
     def split_pdf(self, uploaded_file, page_range):
         try:
             input_pdf=PdfReader(uploaded_file)
         except Exception as e:
-            return Response({'error':'failed to read PDF:{}'.format(str(e))},status=status.HTTP_400_BAD_REQUEST)
+            self.error_message.append(f'failed to read PDF:{str(e)}')
 
         if page_range is not None:
             page_lists = list(map(int, page_range.split(',')))
         else:
-            return Response({'error': 'Page range is not given'}, status=status.HTTP_400_BAD_REQUEST)
+            self.error_message.append(f'Page range is not given')
 
         # input_pdf = PdfReader(uploaded_file)
 
@@ -34,6 +36,7 @@ class MergeAndSplit:
                 split_files.append(output_file_path)
 
         return split_files
+    
 
     def merge_pdfs(self, split_files):
         output_pdf = PdfWriter()
@@ -50,4 +53,9 @@ class MergeAndSplit:
         with open(output_file_path, 'wb') as output_pdf_file:
             output_pdf.write(output_pdf_file)
 
+
+
+
         return output_file_path
+    
+

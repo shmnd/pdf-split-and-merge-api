@@ -1,3 +1,4 @@
+from typing import Any
 from django.shortcuts import render
 from .serializers import StudentSerializer,RegisterSerializer,LoginSerializer,LogoutSerializer,PdfUploadSerializer
 from .models import Students
@@ -20,14 +21,12 @@ from io import BytesIO
 
 # Create your views here.
 
-
-#///////////////////////////////////////follow coding structure
-
-
 class PdfMerge(APIView):
+    def __init__(self):
+        self.error_messages = []
 
     def post(self, request, format=None):
-        file_link = request.data.get('link')
+        file_link = request.data.get('link',None)
         page_range = request.data.get('pages')
 
         if not file_link or not page_range:
@@ -43,12 +42,16 @@ class PdfMerge(APIView):
             return Response({'error': 'Failed to fetch the PDF file: {}'.format(str(e))}, status=status.HTTP_400_BAD_REQUEST)
 
         # Create an instance of the MergeAndSplit class
-        merge_splitter = MergeAndSplit()
+        merge_splitter = MergeAndSplit(error_messages=self.error_messages)
 
         # Call split_pdf method passing the uploaded_file and page_range
         result = merge_splitter.split_pdf(uploaded_file, page_range)
-        if isinstance(result, Response):
-            return result
+
+        if len(self.error_message) > 0:
+            msg = ",".join(self.error_message)
+            return Response({'error': msg}, status=status.HTTP_400_BAD_REQUEST)
+
+  
 
 
         # Call merge_pdfs method passing the result
@@ -136,7 +139,6 @@ class UserRegisterApi(APIView):
             return Response(serializer.data,status=status.HTTP_201_CREATED)
         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
     
-
 
 class LoginApi(APIView):
     def post(self, request):

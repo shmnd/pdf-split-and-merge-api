@@ -13,56 +13,68 @@ from django.shortcuts import get_object_or_404
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
 
+
 import os
 from PyPDF2 import PdfReader,PdfWriter
-
-
+from PyPDF2 import PdfFileWriter,PdfFileReader
 # Create your views here.
 
+
 class PdfMerge(APIView):
-    def post(self,request,format=None):
-        uploaded_file=request.FILES.get('file')
-        page_range=request.data.get('pages')
+
+    def post(self, request, format=None):
+        uploaded_file = request.FILES.get('file')
+        page_range = request.data.get('pages')
 
         if not uploaded_file or not page_range:
-            return Response({'error':'you entered data is incorrect pls choose pdf file and page range'},status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'You entered data is incorrect. Please choose a PDF file and page range'}, status=status.HTTP_400_BAD_REQUEST)
 
-        if page_range is not None:
-            page_lists=list(map(int,page_range.split(',')))
+        # Call split_pdf method passing the uploaded_file and page_range
+        result = self.split_pdf(uploaded_file, page_range)
+        if isinstance(result, Response):
+            return result
+
+        # If split_pdf returns split_files, call merge_pdfs
+        if result:
+            merged_file = self.merge_pdfs(result)
+            return Response({'merged_file': merged_file}, status=status.HTTP_200_OK)
         else:
-            return Response({'error':'page range is not given'},status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'Failed to split the PDF file'}, status=status.HTTP_400_BAD_REQUEST)
 
+    def split_pdf(self, uploaded_file, page_range):
+        if page_range is not None:
+            page_lists = list(map(int, page_range.split(',')))
+        else:
+            return Response({'error': 'Page range is not given'}, status=status.HTTP_400_BAD_REQUEST)
 
-        #create a folder to save merged pdf
+        input_pdf = PdfReader(uploaded_file)
 
-        output_folder=os.path.join('media','merged_pdfs')
-        os.makedirs(output_folder,exist_ok=True)
+        split_files = []
+        for page_num in page_lists:
+            if 1 <= page_num <= len(input_pdf.pages):
+                output_pdf = PdfWriter()
+                output_pdf.add_page(input_pdf.pages[page_num - 1])
+                output_file_path = os.path.join('media', 'split_pdfs', f'split_page_{page_num}.pdf')
+                with open(output_file_path, 'wb') as output_pdf_file:
+                    output_pdf.write(output_pdf_file)
+                split_files.append(output_file_path)
 
-        # Save the uploaded PDF file
-        input_pdf_path=os.path.join(output_folder,uploaded_file.name)
-        with open(input_pdf_path,'wb') as pdf_file:
-            for chunk in uploaded_file.chunks():
-                pdf_file.write(chunk)
+        return split_files
 
-        # Merge the specified pages from the PDF file
-        output_pdf_path=os.path.join(output_folder,'merged_file.pdf')
-        pdf_writer=PdfWriter()
+    def merge_pdfs(self, split_files):
+        output_pdf = PdfWriter()
 
-        with open(input_pdf_path,'rb') as input_pdf:
-            pdf_reader=PdfReader(input_pdf)
+        for uploaded_file in split_files:
+            input_pdf = PdfReader(uploaded_file)
+            for page in range(len(input_pdf.pages)):
+                output_pdf.add_page(input_pdf.pages[page])
 
-            for page_num in page_lists:
-                if 1<=page_num <=len(pdf_reader.pages):
-                    #adding pages into new pdf
-                    pdf_writer.add_page(pdf_reader.pages[page_num-1])
+        output_file_path = os.path.join('media', 'merged_pdfs', 'merged_file.pdf')
+        with open(output_file_path, 'wb') as output_pdf_file:
+            output_pdf.write(output_pdf_file)
 
+        return output_file_path
 
-        #writing the merged pdf to the output file
-
-        with open(output_pdf_path,'wb') as output_pdf_file:
-            pdf_writer.write(output_pdf_file)
-
-        return Response({'merged_file': output_pdf_path}, status=status.HTTP_201_CREATED)
 
 
 

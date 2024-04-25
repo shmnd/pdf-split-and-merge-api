@@ -13,13 +13,13 @@ from django.shortcuts import get_object_or_404
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
 
+from erp_core.helpers.pdf_merge_split import MergeAndSplit
 
-import os
-from PyPDF2 import PdfReader,PdfWriter
-from PyPDF2 import PdfFileWriter,PdfFileReader
+
 # Create your views here.
 
 
+#///////////////////////////////////////follow coding structure
 class PdfMerge(APIView):
 
     def post(self, request, format=None):
@@ -29,56 +29,20 @@ class PdfMerge(APIView):
         if not uploaded_file or not page_range:
             return Response({'error': 'You entered data is incorrect. Please choose a PDF file and page range'}, status=status.HTTP_400_BAD_REQUEST)
 
+        # Create an instance of the MergeAndSplit class
+        merge_splitter = MergeAndSplit()
+
         # Call split_pdf method passing the uploaded_file and page_range
-        result = self.split_pdf(uploaded_file, page_range)
+        result = merge_splitter.split_pdf(uploaded_file, page_range)
         if isinstance(result, Response):
             return result
 
-        # If split_pdf returns split_files, call merge_pdfs
-        if result:
-            merged_file = self.merge_pdfs(result)
-            return Response({'merged_file': merged_file}, status=status.HTTP_200_OK)
-        else:
-            return Response({'error': 'Failed to split the PDF file'}, status=status.HTTP_400_BAD_REQUEST)
 
-    def split_pdf(self, uploaded_file, page_range):
-        if page_range is not None:
-            page_lists = list(map(int, page_range.split(',')))
-        else:
-            return Response({'error': 'Page range is not given'}, status=status.HTTP_400_BAD_REQUEST)
+        # Call merge_pdfs method passing the result
+        merged_file = merge_splitter.merge_pdfs(result)
+        return Response({'merged_file': merged_file}, status=status.HTTP_200_OK)
 
-        input_pdf = PdfReader(uploaded_file)
-
-        split_files = []
-        for page_num in page_lists:
-            if 1 <= page_num <= len(input_pdf.pages):
-                output_pdf = PdfWriter()
-                output_pdf.add_page(input_pdf.pages[page_num - 1])
-                output_file_path = os.path.join('media', 'split_pdfs', f'split_page_{page_num}.pdf')
-                with open(output_file_path, 'wb') as output_pdf_file:
-                    output_pdf.write(output_pdf_file)
-                split_files.append(output_file_path)
-
-        return split_files
-
-    def merge_pdfs(self, split_files):
-        output_pdf = PdfWriter()
-
-        for uploaded_file in split_files:
-            input_pdf = PdfReader(uploaded_file)
-            for page in range(len(input_pdf.pages)):
-                output_pdf.add_page(input_pdf.pages[page])
-
-        output_file_path = os.path.join('media', 'merged_pdfs', 'merged_file.pdf')
-        with open(output_file_path, 'wb') as output_pdf_file:
-            output_pdf.write(output_pdf_file)
-
-        return output_file_path
-
-
-
-
-
+   
 class StudentList(APIView):
     def __init__(self, **kwargs):
         self.response_format=ResponseInfo().response

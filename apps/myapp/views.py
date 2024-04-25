@@ -15,19 +15,32 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 from erp_core.helpers.pdf_merge_split import MergeAndSplit
 
+import requests
+from io import BytesIO
 
 # Create your views here.
 
 
 #///////////////////////////////////////follow coding structure
+
+
 class PdfMerge(APIView):
 
     def post(self, request, format=None):
-        uploaded_file = request.FILES.get('file')
+        file_link = request.data.get('link')
         page_range = request.data.get('pages')
 
-        if not uploaded_file or not page_range:
+        if not file_link or not page_range:
             return Response({'error': 'You entered data is incorrect. Please choose a PDF file and page range'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Fetch the PDF file from the provided link
+        try:
+            response = requests.get(file_link)
+            if response.status_code != 200:
+                return Response({'error': 'Failed to fetch the PDF file from the provided link'}, status=status.HTTP_400_BAD_REQUEST)
+            uploaded_file = BytesIO(response.content)  # Convert content to file-like object
+        except Exception as e:
+            return Response({'error': 'Failed to fetch the PDF file: {}'.format(str(e))}, status=status.HTTP_400_BAD_REQUEST)
 
         # Create an instance of the MergeAndSplit class
         merge_splitter = MergeAndSplit()

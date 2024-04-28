@@ -17,6 +17,8 @@ from erp_core.helpers.pdf_merge_split import MergeAndSplit
 import requests
 from io import BytesIO
 
+from django.contrib.auth import logout
+
 
 # Create your views here.
 
@@ -70,22 +72,25 @@ class StudentList(APIView):
     
     def post(self,request):
         try:
+
             serializer=self.serializer_class(data=request.data)
+
             if not serializer.is_valid():
-                self.response_format['status_code']=status.HTTP_400_BAD_REQUEST
-                self.response_format['status']=False
-                self.response_format['errors']=serializer.errors
+                self.response_format['status_code']   = status.HTTP_400_BAD_REQUEST
+                self.response_format['status']        = False
+                self.response_format['errors']        = serializer.errors
                 return Response(self.response_format,status=status.HTTP_400_BAD_REQUEST)
             
             serializer.save()
-            self.response_format['status_code'] = status.HTTP_201_CREATED
-            self.response_format["message"] = 'sucess'
-            self.response_format["status"] = True
+            self.response_format['status_code']   = status.HTTP_201_CREATED
+            self.response_format["message"]       = 'sucess'
+            self.response_format["status"]        = True
             return Response(self.response_format, status=status.HTTP_201_CREATED)
+        
         except Exception as e:
-            self.response_format['status_code'] = status.HTTP_500_INTERNAL_SERVER_ERROR
-            self.response_format['status'] = False
-            self.response_format['message'] = str(e)
+            self.response_format['status_code']   = status.HTTP_500_INTERNAL_SERVER_ERROR
+            self.response_format['status']        = False
+            self.response_format['message']       = str(e)
             return Response(self.response_format, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
@@ -105,20 +110,20 @@ class StudentData(APIView):
         serializer=StudentSerializer(stu,data=request.data)
         try:
             if not serializer.is_valid():
-                self.response_format['status_code']=status.HTTP_400_BAD_REQUEST
-                self.response_format['status']=False
-                self.response_format['errors']=serializer.errors
+                self.response_format['status_code']   = status.HTTP_400_BAD_REQUEST
+                self.response_format['status']        = False
+                self.response_format['errors']        = serializer.errors
                 return Response(self.response_format,status=status.HTTP_400_BAD_REQUEST)
             
             serializer.save()
-            self.response_format['status_code'] = status.HTTP_201_CREATED
-            self.response_format["message"] = 'sucess'
-            self.response_format["status"] = True
+            self.response_format['status_code']   = status.HTTP_201_CREATED
+            self.response_format["message"]       = 'sucess'
+            self.response_format["status"]        = True
             return Response(self.response_format, status=status.HTTP_201_CREATED)
         except Exception as e:
-            self.response_format['status_code'] = status.HTTP_500_INTERNAL_SERVER_ERROR
-            self.response_format['status'] = False
-            self.response_format['message'] = str(e)
+            self.response_format['status_code']   = status.HTTP_500_INTERNAL_SERVER_ERROR
+            self.response_format['status']        = False
+            self.response_format['message']       = str(e)
             return Response(self.response_format, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def delete(self,request,id):
@@ -164,26 +169,13 @@ class LogoutApi(APIView):
 
     serilazer_class=LogoutSerializer
     permission_classes=(IsAuthenticated,)
-    # logout
 
     def post(self,request):
         try:
-
             refresh_token=request.data.get('refresh_token')
-            print(refresh_token,'aaaaaaaaaaa')
+            logout(request)
             RefreshToken(refresh_token).blacklist()
-
             return Response({'details':'Logout sucessfuly'},status=status.HTTP_200_OK)
         except Exception as e:
              return Response({"detail": "Invalid token."}, status=status.HTTP_400_BAD_REQUEST)
         
-
-
-
-
-
-
-
-
-
-

@@ -1,17 +1,9 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import Students,Pdf_Files
+from .models import Students
 
 
 
-# pdf file things/////////////////////////////////////////////////////////////////////
-
-class PdfUploadSerializer(serializers.ModelSerializer):
-    pdf_file=serializers.FileField()
-
-    class Meta:
-        model=Pdf_Files
-        fields=['pdf_file']
 
 
 # Authentication using jwt//////////////////////////////////////////////////////////////////////////////////

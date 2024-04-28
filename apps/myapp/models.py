@@ -31,15 +31,7 @@ class BaseModel(models.Model):
 
 #pdf ////////////////////////////////////////////////////////////////////
 
-class Pdf_Files(models.Model):
-    PDF_FILES=models.FileField(_("pdf_files"),null=True,blank=True, upload_to='pdf_files')
 
-    class Meta:
-        verbose_name='file'
-        verbose_name_plural='files'
-
-    def __str__(self):
-        return str(self.PDF_FILES)
         
 
 #pdf ////////////////////////////////////////////////////////////////////

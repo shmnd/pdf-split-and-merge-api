@@ -1,6 +1,4 @@
-from typing import Any
-from django.shortcuts import render
-from .serializers import StudentSerializer,RegisterSerializer,LoginSerializer,LogoutSerializer,PdfUploadSerializer
+from .serializers import StudentSerializer,RegisterSerializer,LoginSerializer,LogoutSerializer
 from .models import Students
 
 from erp_core.helpers.response import ResponseInfo
@@ -18,6 +16,7 @@ from erp_core.helpers.pdf_merge_split import MergeAndSplit
 
 import requests
 from io import BytesIO
+
 
 # Create your views here.
 
@@ -47,12 +46,9 @@ class PdfMerge(APIView):
         # Call split_pdf method passing the uploaded_file and page_range
         result = merge_splitter.split_pdf(uploaded_file, page_range)
 
-        if len(self.error_message) > 0:
-            msg = ",".join(self.error_message)
+        if len(self.error_messages) > 0:
+            msg = ",".join(self.error_messages)
             return Response({'error': msg}, status=status.HTTP_400_BAD_REQUEST)
-
-  
-
 
         # Call merge_pdfs method passing the result
         merged_file = merge_splitter.merge_pdfs(result)
@@ -168,19 +164,14 @@ class LogoutApi(APIView):
 
     serilazer_class=LogoutSerializer
     permission_classes=(IsAuthenticated,)
+    # logout
 
     def post(self,request):
         try:
 
-            # refresh_token=request.data.get('token')
             refresh_token=request.data.get('refresh_token')
-            # refresh_token='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzEzOTQzMTc4LCJpYXQiOjE3MTM5NDI4NzgsImp0aSI6ImRkMjNlZjA5N2ExODRiYTE5OWI1NzE0ZmRhMzUxMDcxIiwidXNlcl9pZCI6MTF9._NYwia1CF6gbfZbGc1j_rgP8OGWAntt6sQfCHeNpPms'
             print(refresh_token,'aaaaaaaaaaa')
             RefreshToken(refresh_token).blacklist()
-
-            # print(refresh_token_obj,'bbbbbbbbbbbbbbbbbbbb')
-            # refresh_token_obj.blacklist()
-            # print(refresh_token_obj,'ccccccccccc')
 
             return Response({'details':'Logout sucessfuly'},status=status.HTTP_200_OK)
         except Exception as e:

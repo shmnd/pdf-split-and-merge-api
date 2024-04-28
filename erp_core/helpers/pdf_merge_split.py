@@ -52,10 +52,6 @@ class MergeAndSplit():
         output_file_path = os.path.join('media', 'merged_pdfs', 'merged_file.pdf')
         with open(output_file_path, 'wb') as output_pdf_file:
             output_pdf.write(output_pdf_file)
-
-
-
-
         return output_file_path
     
 

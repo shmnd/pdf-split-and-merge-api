@@ -54,6 +54,7 @@ class PdfMerge(APIView):
 
         # Call merge_pdfs method passing the result
         merged_file = merge_splitter.merge_pdfs(result)
+        uploaded_file.close()
         return Response({'merged_file': merged_file}, status=status.HTTP_200_OK)
 
    

@@ -28,37 +28,37 @@ class MergeAndSplit():
                 output_pdf = PdfWriter()
                 output_pdf.add_page(input_pdf.pages[page_num - 1])
 
-                # Create a BytesIO object to hold the PDF data
+                '''Create a BytesIO object to hold the PDF data'''
                 output_pdf_buffer=BytesIO()
                 output_pdf.write(output_pdf_buffer)
 
-                # Reset the buffer position to the beginning
+                '''Reset the buffer position to the beginning'''
                 output_pdf_buffer.seek(0)
 
-                # Append the BytesIO object to the list
+                '''Append the BytesIO object to the list'''
                 split_files.append(output_pdf_buffer)
 
         return split_files
 
 
 
-    '''old fucntion '''
     def merge_pdfs(self, split_files):
         output_pdf = PdfWriter()
         
         for uploaded_file in split_files:
             input_pdf = PdfReader(uploaded_file)
+
             for page in range(len(input_pdf.pages)):
                 output_pdf.add_page(input_pdf.pages[page])
 
-            output_file = os.path.join('media', 'merged_pdfs')
-            os.makedirs(output_file, exist_ok=True)
-            output_file_path=os.path.join('media', 'merged_pdfs','merged_file.pdf')
+        output_file = os.path.join('media', 'merged_pdfs')
+        os.makedirs(output_file, exist_ok=True)
+        output_file_path=os.path.join('media', 'merged_pdfs','merged_file.pdf')
 
-            with open(output_file_path, 'wb') as output_pdf_file:
-                output_pdf.write(output_pdf_file)
-                output_pdf_file.close()
-            
-            return output_file_path
+        with open(output_file_path, 'wb') as output_pdf_file:
+            output_pdf.write(output_pdf_file)
+            output_pdf_file.close()
+        
+        return output_file_path
     
 
